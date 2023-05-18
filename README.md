@@ -1,34 +1,52 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# VATSIM Connect in Next.js 13 and NextAuth
 
-## Getting Started
+## Why
 
-First, run the development server:
+Next.js 13 introduces the new app router feature that breaks most NextAuth implementations. I've done some searching and have moved some files around
+to get it working again with VATSIM Connect.
+
+## Running
+
+This app uses:
+
+- Next.js 13
+- NextAuth v4
+- MongoDB v5
+- Mongoose v7
+
+If you'd like to use a different database, see Change The Database.
+
+Ensure you have implemented the environment variables in found in `.env.local.example` in your own `.env.local` file.
+
+Then, simply download and extract wherever you want. With your favorite terminal, navigate to the extracted files and run:
+
+```bash
+npm i
+```
+
+Then, after ensuring your database is running, run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This starts a development server. More build/run scripts can be found in `package.json`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## What Changed?
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The `[...nextauth].ts` file changed so that it exports a handler function. The configuration was moved to `./libs/auth/auth.ts`.
+NextAuth have done some [funky magic](https://next-auth.js.org/configuration/initialization#route-handlers-app) that detects if NextAuth is being initialised in a Route Handler.
 
-## Learn More
+The JSX in `./app/layout.tsx` has been wrapped in a custom context that takes the session as a prop. This is because the `SessionProvider` context cannot be used on a server component (at least, that is what I understood from the errors I was getting). The session is fetched in `layout.tsx` as it's a server component (doesn't have `use client` at the top of the page) as to get the session from the client's side, you'd have to make a GET request to `/api/auth/session` and passed to `auth-context.ts`, where it provides the session to the rest of the app.
 
-To learn more about Next.js, take a look at the following resources:
+## Change The Database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If you don't want to use MongoDB, that's fine. You'll need to change the adaptor in `./libs/auth/auth.ts`.
+See documentation from NextAuth about the databases and ORMs they support: <https://authjs.dev/reference/adapters>
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Once you've changed the database, you can delete the models, and database adaptors/mongoose connection.
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+I'm very new to Next.js, and very much a self taught web developer. If you see something that isn't quite right, please let me know, or feel free to correct it yourself.
+I appreciate all feedback!
