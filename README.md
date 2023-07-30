@@ -11,12 +11,12 @@ This app uses:
 
 - Next.js 13
 - NextAuth v4
-- MongoDB v5
-- Mongoose v7
+- Prisma v5
+- Postgres Database (any version that works with Prisma)
 
 If you'd like to use a different database, see Change The Database.
 
-Ensure you have implemented the environment variables in found in `.env.local.example` in your own `.env.local` file.
+Ensure you have implemented the environment variables in found in `.env.example` in your own `.env` file.
 
 Then, simply download and extract wherever you want. With your favorite terminal, navigate to the extracted files and run:
 
@@ -41,10 +41,7 @@ The JSX in `./app/layout.tsx` has been wrapped in a custom context that takes th
 
 ## Change The Database
 
-If you don't want to use MongoDB, that's fine. You'll need to change the adaptor in `./libs/auth/auth.ts`.
-See documentation from NextAuth about the databases and ORMs they support: <https://authjs.dev/reference/adapters>
-
-Once you've changed the database, you can delete the models, and database adaptors/mongoose connection.
+This example uses [Prisma](https://www.prisma.io/). To change the database, follow the instructions from Prisma.
 
 ## Contributing
 

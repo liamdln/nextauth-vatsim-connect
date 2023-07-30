@@ -1,49 +1,6 @@
-"use client";
+import { SignInButton } from "@/components/auth/buttons";
 
-import PrimaryButton from "@/components/primary-button";
-import { signIn, useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-export default function Home() {
-
-    // setup
-    const session = useSession();
-    const router = useRouter();
-
-    // state
-    const [loginLoading, setLoginLoading] = useState(false);
-
-    // get error url parameter (if there is one)
-    const error = useSearchParams().get("error");
-
-    useEffect(() => {
-        // if there is an authenticated session,
-        // go to /dashboard
-        if (session.status === "authenticated") {
-            router.push("/dashboard");
-        }
-        // can do some session loading page here
-    })
-
-    // check if there is an error code in the URL
-    useEffect(() => {
-        // if there is an error
-        // show the error page.
-        if (error) {
-            router.push("/errors/login")
-        }
-    })
-
-    const handleSignIn = () => {
-
-        setLoginLoading(true);
-        // sign in with vatsim, on a successful sign in,
-        // return to /dashboard.
-        signIn("vatsim", { callbackUrl: "/dashboard" });
-    }
-
+export default async function Home() {
     return (
         <main className="h-screen flex flex-col text-center justify-center">
             <div>
@@ -54,9 +11,7 @@ export default function Home() {
                 </p>
             </div>
             <div className="mt-5">
-                <PrimaryButton className="w-56" disabled={ loginLoading } onClick={() => handleSignIn()}>
-                    {loginLoading ? "Loading..." : "Login"}
-                </PrimaryButton>
+                <SignInButton provider={"vatsim"} callback={ "/dashboard" }>Login with VATSIM</SignInButton>
             </div>
         </main>
     )
