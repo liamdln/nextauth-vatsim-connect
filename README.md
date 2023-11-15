@@ -12,7 +12,7 @@ This app uses:
 - Next.js 13
 - NextAuth v4
 - Prisma v5
-- Postgres Database (any version that works with Prisma)
+- MySQL Database (any version that works with Prisma)
 
 If you'd like to use a different database, see Change The Database.
 
