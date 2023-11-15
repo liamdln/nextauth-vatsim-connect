@@ -9,10 +9,6 @@ const VATSIM_SECRET = process.env.VATSIM_SECRET!;
 
 export const authOptions: NextAuthOptions = {
     providers: [
-        // Discord({
-        //     clientId: DISCORD_ID,
-        //     clientSecret: DISCORD_SECRET
-        // }),
         {
             id: "vatsim",
             name: "VATSIM Connect",
@@ -21,6 +17,8 @@ export const authOptions: NextAuthOptions = {
             authorization: {
                 url: `${VATSIM_URL}/oauth/authorize?response_type=code`,
                 params: {
+                    // add the scope that you want from the
+                    // sso here.
                     scope: "full_name vatsim_details email",
                 },
             },
@@ -68,57 +66,65 @@ export const authOptions: NextAuthOptions = {
             session.user = token.user;
             return session;
         },
-        async jwt({ token, profile, user }) {
+        async jwt({ token, profile, user, account }) {
+            
+            // this function is called when the session is accessed
+            // but if account exists, it runs on sign in only
+            if (account) {
+                if (profile && user) {
 
-            if (profile && user) {
+                    // push the updated data to the database
+                    const then = user.lastLogin ? user.lastLogin.getTime() : 0
+                    const now = new Date().getTime()
+                    const dataRefreshTimeout = 30 * 60 * 1000 // 30 mins
 
-                const then = user.lastLogin ? user.lastLogin.getTime() : 0
-                const now = new Date().getTime()
-                const dataRefreshTimeout = 30 * 60 * 1000 // 30 mins
-
-                if (now - then > dataRefreshTimeout) {
-                    await prisma.user.update({
-                        where: { cid: user.cid },
-                        data: {
-                            cid: profile.data.cid,
-                            name: profile.data.personal.name_full,
-                            email: profile.data.personal.email,
-                            emailVerified: user.emailVerified,
-                            lastLogin: new Date(),
-                            vatsimData: {
-                                update: {
-                                    region: profile.data.vatsim.region.name || null,
-                                    regionId: profile.data.vatsim.region.id || null,
-                                    division: profile.data.vatsim.division.name || null,
-                                    divisionId: profile.data.vatsim.division.id || null,
-                                    subDivision: profile.data.vatsim.subdivision.name || null,
-                                    subDivisionId: profile.data.vatsim.subdivision.id || null,
-                                    ratingLong: profile.data.vatsim.rating.long,
-                                    ratingShort: profile.data.vatsim.rating.short,
-                                    ratingId: profile.data.vatsim.rating.id,
-                                    pilotRatingLong: profile.data.vatsim.pilotrating.long,
-                                    pilotRatingShort: profile.data.vatsim.pilotrating.short,
-                                    pilotRatingId: profile.data.vatsim.pilotrating.id
+                    if (now - then > dataRefreshTimeout) {
+                        await prisma.user.update({
+                            where: { cid: user.cid },
+                            data: {
+                                cid: profile.data.cid,
+                                name: profile.data.personal.name_full,
+                                email: profile.data.personal.email,
+                                emailVerified: user.emailVerified,
+                                lastLogin: new Date(),
+                                vatsimData: {
+                                    update: {
+                                        region: profile.data.vatsim.region.name || null,
+                                        regionId: profile.data.vatsim.region.id || null,
+                                        division: profile.data.vatsim.division.name || null,
+                                        divisionId: profile.data.vatsim.division.id || null,
+                                        subDivision: profile.data.vatsim.subdivision.name || null,
+                                        subDivisionId: profile.data.vatsim.subdivision.id || null,
+                                        ratingLong: profile.data.vatsim.rating.long,
+                                        ratingShort: profile.data.vatsim.rating.short,
+                                        ratingId: profile.data.vatsim.rating.id,
+                                        pilotRatingLong: profile.data.vatsim.pilotrating.long,
+                                        pilotRatingShort: profile.data.vatsim.pilotrating.short,
+                                        pilotRatingId: profile.data.vatsim.pilotrating.id
+                                    }
                                 }
                             }
-                        }
-                    })
-                } else {
-                    // update the last login
-                    await prisma.user.update({
-                        where: { cid: user.cid },
-                        data: { ...user, lastLogin: new Date() }
-                    })
-                }
+                        })
+                    } else {
+                        // update the last login field
+                        await prisma.user.update({
+                            where: { cid: user.cid },
+                            data: { ...user, lastLogin: new Date() }
+                        })
+                    }
 
-                token.user = {
-                    cid: profile.data.cid,
-                    name: profile.data.personal.name_full,
-                    email: profile.data.personal.email,
-                    vatsim: profile.data.vatsim
+                    token.user = {
+                        cid: profile.data.cid,
+                        name: profile.data.personal.name_full,
+                        email: profile.data.personal.email,
+                        vatsim: profile.data.vatsim
+                    }
                 }
-            };
+                console.log("Expensive DB lookup run.")
+            }
+
             return token;
+
         }
     },
     session: {
