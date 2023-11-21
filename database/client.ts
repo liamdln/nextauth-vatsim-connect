@@ -1,3 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 
-export const prisma = new PrismaClient()
+let prisma = new PrismaClient()
+
+export function getDbClient() {
+    return prisma;
+}
+
+export function resetDbClient() {
+    prisma = new PrismaClient();
+}

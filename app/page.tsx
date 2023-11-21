@@ -6,7 +6,7 @@ export default async function Home() {
             <div>
                 <h1 className="text-8xl">Hello</h1>
                 <p className="max-w-xs mx-auto">
-                    This is an example of NextAuth and Next.js 13 working with&nbsp;
+                    This is an example of NextAuth and Next.js 14 working with&nbsp;
                     <a href="https://auth.vatsim.net/" target="_blank" className="font-bold">VATSIM&apos;s SSO.</a>
                 </p>
             </div>

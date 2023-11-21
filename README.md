@@ -1,15 +1,15 @@
-# VATSIM Connect in Next.js 13 and NextAuth
+# VATSIM Connect in Next.js 14 and NextAuth
 
 ## Why
 
-Next.js 13 introduces the new app router feature that breaks most NextAuth implementations. I've done some searching and have moved some files around
+Next.js 14 introduces the new app router feature that breaks most NextAuth implementations. I've done some searching and have moved some files around
 to get it working again with VATSIM Connect.
 
 ## Running
 
 This app uses:
 
-- Next.js 13
+- Next.js 14
 - NextAuth v4
 - Prisma v5
 - MySQL Database (any version that works with Prisma)
@@ -45,5 +45,5 @@ This example uses [Prisma](https://www.prisma.io/). To change the database, foll
 
 ## Contributing
 
-I'm very new to Next.js, and very much a self taught web developer. If you see something that isn't quite right, please let me know, or feel free to correct it yourself.
+I'm very much a self taught web developer. If you see something that isn't quite right, please let me know, or feel free to correct it yourself.
 I appreciate all feedback!

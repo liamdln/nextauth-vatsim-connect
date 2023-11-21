@@ -46,8 +46,6 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    lastLogin     DateTime?
-    vatsimData    VatsimData?
 }
 
 model VerificationToken {
@@ -56,23 +54,4 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
-}
-
-model VatsimData {
-    cid              String    @unique
-    region           String?
-    regionId         String?
-    division         String?
-    divisionId       String?
-    subDivision      String?
-    subDivisionId    String?
-    ratingLong       String
-    ratingShort      String
-    ratingId         Int
-    pilotRatingLong  String
-    pilotRatingShort String
-    pilotRatingId    Int
-    lastUpdate       DateTime?
-
-    user User @relation(fields: [cid], references: [cid], onDelete: Cascade)
 }

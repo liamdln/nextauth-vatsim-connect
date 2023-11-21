@@ -1,13 +1,16 @@
 import NextAuth from "next-auth/next";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { prisma } from "@/database/client";
 import { NextAuthOptions } from "next-auth";
+import { getDbClient } from "@/database/client";
 
 const VATSIM_URL = process.env.VATSIM_URL!;
 const VATSIM_ID = process.env.VATSIM_ID!;
 const VATSIM_SECRET = process.env.VATSIM_SECRET!;
 
+const prisma = getDbClient();
+
 export const authOptions: NextAuthOptions = {
+    adapter: PrismaAdapter(prisma),
     providers: [
         {
             id: "vatsim",
@@ -38,93 +41,31 @@ export const authOptions: NextAuthOptions = {
                     name: profile.data.personal.name_full,
                     email: profile.data.personal.email,
                     emailVerified: null,
-                    lastLogin: null,
-                    vatsimData: {
-                        create: {
-                            region: profile.data.vatsim.region.name || null,
-                            regionId: profile.data.vatsim.region.id || null,
-                            division: profile.data.vatsim.division.name || null,
-                            divisionId: profile.data.vatsim.division.id || null,
-                            subDivision: profile.data.vatsim.subdivision.name || null,
-                            subDivisionId: profile.data.vatsim.subdivision.id || null,
-                            ratingLong: profile.data.vatsim.rating.long,
-                            ratingShort: profile.data.vatsim.rating.short,
-                            ratingId: profile.data.vatsim.rating.id,
-                            pilotRatingLong: profile.data.vatsim.pilotrating.long,
-                            pilotRatingShort: profile.data.vatsim.pilotrating.short,
-                            pilotRatingId: profile.data.vatsim.pilotrating.id,
-                            lastUpdate: new Date()
-                        }
-                    }
                 }
             },
         }
     ],
-    adapter: PrismaAdapter(prisma),
     callbacks: {
+        // async signIn({ profile }) {
+        //     const blacklistedCids: string[] = ["10000009"]
+            
+        //     if (profile) {
+        //         if (blacklistedCids.includes(profile.data.cid)) {
+        //             return false;
+        //         }
+        //     }
+        //     return true;
+        // },
         async session({ session, token }) {
-            session.user = token.user;
+            session.user = token.data;
             return session;
         },
-        async jwt({ token, profile, user, account }) {
-            
-            // this function is called when the session is accessed
-            // but if account exists, it runs on sign in only
-            if (account) {
-                if (profile && user) {
-
-                    // push the updated data to the database
-                    const then = user.lastLogin ? user.lastLogin.getTime() : 0
-                    const now = new Date().getTime()
-                    const dataRefreshTimeout = 30 * 60 * 1000 // 30 mins
-
-                    if (now - then > dataRefreshTimeout) {
-                        await prisma.user.update({
-                            where: { cid: user.cid },
-                            data: {
-                                cid: profile.data.cid,
-                                name: profile.data.personal.name_full,
-                                email: profile.data.personal.email,
-                                emailVerified: user.emailVerified,
-                                lastLogin: new Date(),
-                                vatsimData: {
-                                    update: {
-                                        region: profile.data.vatsim.region.name || null,
-                                        regionId: profile.data.vatsim.region.id || null,
-                                        division: profile.data.vatsim.division.name || null,
-                                        divisionId: profile.data.vatsim.division.id || null,
-                                        subDivision: profile.data.vatsim.subdivision.name || null,
-                                        subDivisionId: profile.data.vatsim.subdivision.id || null,
-                                        ratingLong: profile.data.vatsim.rating.long,
-                                        ratingShort: profile.data.vatsim.rating.short,
-                                        ratingId: profile.data.vatsim.rating.id,
-                                        pilotRatingLong: profile.data.vatsim.pilotrating.long,
-                                        pilotRatingShort: profile.data.vatsim.pilotrating.short,
-                                        pilotRatingId: profile.data.vatsim.pilotrating.id
-                                    }
-                                }
-                            }
-                        })
-                    } else {
-                        // update the last login field
-                        await prisma.user.update({
-                            where: { cid: user.cid },
-                            data: { ...user, lastLogin: new Date() }
-                        })
-                    }
-
-                    token.user = {
-                        cid: profile.data.cid,
-                        name: profile.data.personal.name_full,
-                        email: profile.data.personal.email,
-                        vatsim: profile.data.vatsim
-                    }
-                }
-                console.log("Expensive DB lookup run.")
+        async jwt({ token, profile, account }) {
+            // only run on sign in
+            if (account && profile) {
+                token.data = profile.data
             }
-
             return token;
-
         }
     },
     session: {
