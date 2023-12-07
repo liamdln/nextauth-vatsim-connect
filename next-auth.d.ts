@@ -1,4 +1,4 @@
-import { User as UserType, VatsimData } from "@prisma/client"
+import { User as UserType } from "@prisma/client"
 import NextAuth, { DefaultSession, DefaultUser, Profile as DefaultProfile } from "next-auth"
 
 export interface VATSIMData {
@@ -42,6 +42,11 @@ declare module "next-auth" {
     }
     interface Session extends DefaultSession {
         user: VATSIMData
+    }
+    interface User extends Omit<DefaultUser, "id"> {
+        id: UserType["id"];
+        name: string;
+        email: string;
     }
 }
 
