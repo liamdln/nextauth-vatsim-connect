@@ -1,8 +1,6 @@
-import { getDbClient } from "@/database/client";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { NextAuthOptions } from "next-auth";
-
-const prisma = getDbClient();
+import { prisma } from "@/database"
 
 const VATSIM_URL = process.env.VATSIM_URL!;
 const VATSIM_ID = process.env.VATSIM_ID!;
